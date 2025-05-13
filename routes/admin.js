@@ -1,5 +1,6 @@
 const express = require("express");
 const adminRouter = express.Router();
+const { adminModal } = require("../db");
 
 adminRouter.post("/signup", (req, res) => {
   res.json({ msg: "signup" });
