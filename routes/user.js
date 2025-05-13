@@ -9,8 +9,8 @@ userRouter.post("/signin", (req, res) => {
   res.json({ msg: "signin" });
 });
 
-userRouter.post("/purchases", (req, res) => {
+userRouter.get("/purchases", (req, res) => {
   res.json({ msg: "purchases" });
 });
 
-module.exports = {userRouter};
+module.exports = { userRouter };
