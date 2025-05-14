@@ -1,13 +1,16 @@
 const express = require("express");
 const zod = require("zod");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+const JWT_SECRET = "IAmLazyUser";
 
 const { userModel } = require("../db");
 const userRouter = express.Router();
 
 userRouter.post("/signup", async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
-  
+
   const requiredBody = zod.object({
     email: zod.string().max(50).email(),
     password: zod.string().min(8).max(50),
@@ -42,8 +45,24 @@ userRouter.post("/signup", async (req, res) => {
     .catch(() => res.json({ msg: "Email already exist" }));
 });
 
-userRouter.post("/signin", (req, res) => {
-  res.json({ msg: "signin" });
+userRouter.post("/signin", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const response = await userModel.findOne({ email });
+
+    const passwordMatch = bcrypt.compare(password, response.password);
+    
+    if (passwordMatch) {
+      const token = jwt.sign({ id: response._id }, JWT_SECRET);
+      res.json({
+        msg: token,
+      });
+    }
+  } catch (error) {
+    res.json({
+      msg: "Invalid Credential",
+    });
+  }
 });
 
 userRouter.get("/purchases", (req, res) => {

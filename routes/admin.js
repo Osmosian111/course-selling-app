@@ -1,6 +1,9 @@
 const express = require("express");
 const zod = require("zod");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+const JWT_SECRET = "IAmLazyAdmin";
 
 const { adminModel } = require("../db");
 const adminRouter = express.Router();
@@ -42,8 +45,29 @@ adminRouter.post("/signup", async (req, res) => {
     .catch(() => res.json({ msg: "Email already exist" }));
 });
 
-adminRouter.post("/signin", (req, res) => {
-  res.json({ msg: "signin" });
+adminRouter.post("/signin", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const response = await adminModel.findOne({ email });
+
+    if (passwordMatch) {
+      const token = jwt.sign({ id: response._id }, JWT_SECRET);
+      res.json({
+        msg: token,
+      });
+    } else {
+      res.json({
+        msg: "Invalid credential",
+      });
+    }
+  } catch (error) {
+    res.json({
+      msg: "Invalid credential",
+    });
+  }
+
+  const passwordMatch = bcrypt.compare(password, response.password);
 });
 
 adminRouter.post("/course", (req, res) => {
