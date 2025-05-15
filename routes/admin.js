@@ -3,7 +3,7 @@ const zod = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const {JWT_ADMIN_PASSWORD} = require("../config");
+const { JWT_ADMIN_PASSWORD } = require("../config");
 
 const { adminModel, courseModel } = require("../db");
 const { adminMiddleware } = require("../middleware/admin");
@@ -65,7 +65,7 @@ adminRouter.post("/signin", async (req, res) => {
   } catch (error) {
     res.json({
       msg: "Invalid credential",
-      error
+      error,
     });
   }
 });
@@ -95,11 +95,29 @@ adminRouter.post("/course", adminMiddleware, async (req, res) => {
   }
 });
 
-adminRouter.get("/courses", (req, res) => {
-  res.json({ msg: "course" });
+adminRouter.put("/course", adminMiddleware, async (req, res) => {
+  const adminId = req.userId;
+
+  const { title, description, price, imageUrl, courseId } = req.body;
+
+  try {
+    const course = await courseModel.findOneAndUpdate(
+      {
+        _id: courseId,
+        creatorId: adminId,
+      },
+      { title, description, price, imageUrl }
+    );
+    res.json({ msg: "Updated course" });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      msg: "You are not owner of that course or course does not exist",
+    });
+  }
 });
 
-adminRouter.put("/course", (req, res) => {
+adminRouter.get("/course", (req, res) => {
   res.json({ msg: "course" });
 });
 
