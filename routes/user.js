@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = "IAmLazyUser";
 
 const { userMiddleware } = require("../middleware/user");
-const { userModel } = require("../db");
+const { userModel, purchaseModel } = require("../db");
 const userRouter = express.Router();
 
 userRouter.post("/signup", async (req, res) => {
@@ -66,7 +66,10 @@ userRouter.post("/signin", async (req, res) => {
   }
 });
 
-userRouter.get("/purchases", (req, res) => {
+userRouter.get("/purchases", userMiddleware,async (req, res) => {
+  const userId = req.userId;
+
+  const purchases = await purchaseModel.find({userId})
   res.json({ msg: "purchases" });
 });
 
