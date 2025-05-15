@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 
+const { CONNECT_STRING } = require("./config");
+
 const app = express();
 const port = 3000;
 
@@ -14,7 +16,7 @@ app.use("/api/v1/course", courseRouter);
 app.use("/api/v1/admin", adminRouter);
 
 function main() {
-  mongoose.connect("mongodb://localhost:27017/course-selling-app");
+  mongoose.connect(CONNECT_STRING);
   app.listen(port);
 }
 main();

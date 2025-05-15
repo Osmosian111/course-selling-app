@@ -3,9 +3,10 @@ const zod = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = "IAmLazyAdmin";
+const {JWT_ADMIN_PASSWORD} = require("../config");
 
-const { adminModel } = require("../db");
+const { adminModel, courseModel } = require("../db");
+const { adminMiddleware } = require("../middleware/admin");
 const adminRouter = express.Router();
 
 adminRouter.post("/signup", async (req, res) => {
@@ -50,9 +51,9 @@ adminRouter.post("/signin", async (req, res) => {
 
   try {
     const response = await adminModel.findOne({ email });
-
+    const passwordMatch = bcrypt.compare(password, response.password);
     if (passwordMatch) {
-      const token = jwt.sign({ id: response._id }, JWT_SECRET);
+      const token = jwt.sign({ id: response._id }, JWT_ADMIN_PASSWORD);
       res.json({
         msg: token,
       });
@@ -64,14 +65,34 @@ adminRouter.post("/signin", async (req, res) => {
   } catch (error) {
     res.json({
       msg: "Invalid credential",
+      error
     });
   }
-
-  const passwordMatch = bcrypt.compare(password, response.password);
 });
 
-adminRouter.post("/course", (req, res) => {
-  res.json({ msg: "course" });
+adminRouter.post("/course", adminMiddleware, async (req, res) => {
+  const adminId = req.userId;
+
+  const { title, description, imageUrl, price } = req.body;
+
+  try {
+    const course = await courseModel.create({
+      title,
+      description,
+      imageUrl,
+      price,
+      creatorId: adminId,
+    });
+
+    res.json({
+      msg: "Course created",
+      courseId: course._id,
+    });
+  } catch (error) {
+    res.json({
+      msg: "SomeThing is wrong",
+    });
+  }
 });
 
 adminRouter.get("/courses", (req, res) => {
