@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = "IAmLazyUser";
 
+const { userMiddleware } = require("../middleware/user");
 const { userModel } = require("../db");
 const userRouter = express.Router();
 
@@ -51,7 +52,7 @@ userRouter.post("/signin", async (req, res) => {
     const response = await userModel.findOne({ email });
 
     const passwordMatch = bcrypt.compare(password, response.password);
-    
+
     if (passwordMatch) {
       const token = jwt.sign({ id: response._id }, JWT_SECRET);
       res.json({
