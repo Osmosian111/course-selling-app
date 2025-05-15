@@ -70,6 +70,15 @@ userRouter.get("/purchases", userMiddleware,async (req, res) => {
   const userId = req.userId;
 
   const purchases = await purchaseModel.find({userId})
+  if (purchases) {
+    res.json({
+      purchases
+    })
+  }else{
+    res.json({
+      msg:"You haven't purchased any course"
+    })
+  }
   res.json({ msg: "purchases" });
 });
 
