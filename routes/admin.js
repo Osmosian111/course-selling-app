@@ -117,8 +117,20 @@ adminRouter.put("/course", adminMiddleware, async (req, res) => {
   }
 });
 
-adminRouter.get("/course", (req, res) => {
-  res.json({ msg: "course" });
+adminRouter.get("/course/bulk", adminMiddleware, async (req, res) => {
+  const adminId = req.userId;
+
+  try {
+    const course = await courseModel.find({
+      creatorId: adminId,
+    });
+    res.json({
+      course
+    })
+  } catch (error) {
+    res.json({ msg: "Error" });
+  }
+
 });
 
 module.exports = { adminRouter };
