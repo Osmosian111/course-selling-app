@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = "IAmLazyUser";
 
 const { userMiddleware } = require("../middleware/user");
-const { userModel, purchaseModel } = require("../db");
+const { userModel, purchaseModel, courseModel } = require("../db");
 const userRouter = express.Router();
 
 userRouter.post("/signup", async (req, res) => {
@@ -66,18 +66,23 @@ userRouter.post("/signin", async (req, res) => {
   }
 });
 
-userRouter.get("/purchases", userMiddleware,async (req, res) => {
+userRouter.get("/purchases", userMiddleware, async (req, res) => {
   const userId = req.userId;
 
-  const purchases = await purchaseModel.find({userId})
+  const purchases = await purchaseModel.find({ userId });
+
+  const coursesData = await courseModel.find({
+    _id: { $in: purchaseModel.map((x) => x.courseId) },
+  });
+
   if (purchases) {
+    res.json({purchases,
+      coursesData,
+    });
+  } else {
     res.json({
-      purchases
-    })
-  }else{
-    res.json({
-      msg:"You haven't purchased any course"
-    })
+      msg: "You haven't purchased any course",
+    });
   }
   res.json({ msg: "purchases" });
 });
