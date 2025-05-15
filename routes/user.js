@@ -76,9 +76,7 @@ userRouter.get("/purchases", userMiddleware, async (req, res) => {
   });
 
   if (purchases) {
-    res.json({purchases,
-      coursesData,
-    });
+    res.json({ purchases, coursesData });
   } else {
     res.json({
       msg: "You haven't purchased any course",
